@@ -1,0 +1,9 @@
+.venv/
+browser_profile/
+seen_jobs.db
+linkedin_jobs.xlsx
+geo_cache.json
+google_service_account.json
+scraper.log
+__pycache__/
+*.pyc
