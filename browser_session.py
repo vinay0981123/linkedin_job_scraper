@@ -52,12 +52,28 @@ def open_context() -> tuple[BrowserContext, object]:
     context = playwright.chromium.launch_persistent_context(
         user_data_dir=str(config.BROWSER_PROFILE_DIR),
         headless=config.HEADLESS,
-        args=["--start-minimized"] if not config.HEADLESS else [],
+        args=(
+            ["--disable-blink-features=AutomationControlled"]
+            + ([] if config.HEADLESS else ["--start-minimized"])
+        ),
         viewport={"width": 1280, "height": 800},
     )
-    Stealth().apply_stealth_sync(context)
+    # navigator_platform_override matches this machine's real Linux UA —
+    # the library's own default ("Win32") paired with a Linux user agent is
+    # a cross-signal mismatch a real browser would never produce, which is
+    # a stronger tell than not spoofing platform at all.
+    Stealth(navigator_platform_override="Linux x86_64").apply_stealth_sync(context)
 
     if not _has_session_cookie(context):
+        if config.HEADLESS:
+            context.close()
+            playwright.stop()
+            raise RuntimeError(
+                "Not logged in and running headless — there's no visible window for you "
+                "to log into. Set HEADLESS = False in config.py, run once to log in, "
+                "then switch back to headless."
+            )
+
         logger.info(
             "Not logged in to LinkedIn yet. A browser window has opened — "
             "please log in manually (complete any 2FA/verification steps too). "

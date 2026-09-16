@@ -1,6 +1,12 @@
-"""Central configuration. Edit freely — no code changes needed for tuning."""
+"""Central configuration. Edit freely — no code changes needed for tuning.
+
+Real credentials (Telegram token, Sheet ID) live in secrets_local.py, which
+is gitignored and never committed — see secrets_local.py.example.
+"""
 
 from pathlib import Path
+
+import secrets_local
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -37,9 +43,16 @@ POLL_INTERVAL_SECONDS = 5 * 60
 TIME_POSTED_RANGE_SECONDS = 15 * 60
 
 # Random extra delay range (seconds) inserted between per-city searches
-# within a cycle, to avoid a fixed, bot-like request cadence.
+# within a cycle, to avoid a fixed, bot-like request cadence. Also reused
+# between per-job description fetches (see YOUR_YEARS_OF_EXPERIENCE below).
 MIN_INTER_REQUEST_DELAY = 4
 MAX_INTER_REQUEST_DELAY = 12
+
+# LinkedIn's default search radius (~25mi) can exclude genuinely relevant
+# jobs pinned slightly outside a city center. Cast a wider net here, and
+# rely on location_matcher.py's keyword check (against the cities above,
+# or "Remote") as the real enforcement of relevance — not this radius.
+SEARCH_DISTANCE_MILES = 75
 
 # Extra LinkedIn search filters, merged into every search URL as-is.
 # f_VJ=true (verified jobs only) is on by default — filters out likely
@@ -53,32 +66,53 @@ MAX_INTER_REQUEST_DELAY = 12
 #   f_EA   "true" = Easy Apply only
 EXTRA_SEARCH_FILTERS = {
     "f_VJ": "true",
+    "distance": str(SEARCH_DISTANCE_MILES),
 }
+
+# LinkedIn's own f_TPR time filter is a soft target, not a hard guarantee —
+# it can backfill with older postings when very-fresh ones are scarce. This
+# is the real, strictly-enforced cutoff: a job whose displayed "posted time"
+# parses to more than this many minutes old is dropped, no exceptions.
+MAX_POSTED_AGE_MINUTES = 20
+
+# Your actual years of experience. A posting's minimum required years
+# (parsed from its full description via experience_matcher.py) must not
+# exceed this to be kept — e.g. "2-6 years" or "3+ years" both qualify at
+# YOUR_YEARS_OF_EXPERIENCE=4, but "5+ years" doesn't. A posting that
+# doesn't state a requirement at all is always kept.
+YOUR_YEARS_OF_EXPERIENCE = 4
 
 # Output files
 EXCEL_FILE_PATH = BASE_DIR / "linkedin_jobs.xlsx"
 DEDUP_DB_PATH = BASE_DIR / "seen_jobs.db"
 LOG_FILE_PATH = BASE_DIR / "scraper.log"
 
-# Google Sheets — mirrors the Excel output. Off by default; flip to True once
-# you've created a service account, shared the target sheet with it as
-# Editor, and filled in GOOGLE_SHEET_ID below.
+# Log auto-rotates once it hits this size, keeping LOG_BACKUP_COUNT old
+# files (scraper.log.1, .2, ...) before the oldest is deleted — bounds disk
+# usage instead of growing forever over a long-running process.
+LOG_MAX_BYTES = 100 * 1024 * 1024  # 100MB
+LOG_BACKUP_COUNT = 3
+
+# Google Sheets — mirrors the Excel output. The service account and sheet
+# sharing are already set up; GOOGLE_SERVICE_ACCOUNT_FILE just needs a valid
+# key file present (see setup notes if it's missing).
 GOOGLE_SHEETS_ENABLED = True
 GOOGLE_SERVICE_ACCOUNT_FILE = BASE_DIR / "google_service_account.json"
-GOOGLE_SHEET_ID = "1o98uYDvhnxNJMhUeSJHeoAb9URwk0IeId3ygNfvJjqk"
-GOOGLE_SHEET_WORKSHEET_NAME = "Jobs"
+GOOGLE_SHEET_ID = secrets_local.GOOGLE_SHEET_ID
 
-# WhatsApp notifications via CallMeBot's free personal-use API. Off by
-# default; flip to True once you've messaged the CallMeBot bot number and
-# received your API key (see callmebot.com/blog/free-api-whatsapp-messages).
-WHATSAPP_ENABLED = False
-CALLMEBOT_PHONE = ""  # your WhatsApp number with country code, e.g. "+91XXXXXXXXXX"
-CALLMEBOT_APIKEY = ""  # from the "API Activated..." message CallMeBot sends you
+# Telegram notifications via the official Bot API (free, no capacity limits,
+# no third-party relay).
+TELEGRAM_ENABLED = True
+TELEGRAM_BOT_TOKEN = secrets_local.TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID = secrets_local.TELEGRAM_CHAT_ID
 
 # Persistent Chromium profile dir — log in here once manually, every later
 # run reuses the saved session automatically.
 BROWSER_PROFILE_DIR = BASE_DIR / "browser_profile"
 
-# Headed (visible) but launched minimized/off to the side — closer to normal
-# browsing than headless, and lets you step in for a manual login/checkpoint.
-HEADLESS = False
+# Headless — Playwright's modern Chromium headless mode shares the same
+# rendering engine as headed (unlike the old, easily-fingerprinted headless
+# mode), and browser_session.py applies stealth patches + platform-
+# consistency fixes on top. Set to False if you ever need to log in again —
+# headless has no visible window for that (browser_session.py enforces this).
+HEADLESS = True

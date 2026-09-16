@@ -4,6 +4,7 @@ seen_jobs.db
 linkedin_jobs.xlsx
 geo_cache.json
 google_service_account.json
-scraper.log
+secrets_local.py
+scraper.log*
 __pycache__/
 *.pyc

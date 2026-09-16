@@ -19,7 +19,7 @@ def setup_logging() -> None:
     logger.addHandler(console)
 
     file_handler = RotatingFileHandler(
-        config.LOG_FILE_PATH, maxBytes=5 * 1024 * 1024, backupCount=3
+        config.LOG_FILE_PATH, maxBytes=config.LOG_MAX_BYTES, backupCount=config.LOG_BACKUP_COUNT
     )
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
