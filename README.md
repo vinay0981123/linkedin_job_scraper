@@ -102,6 +102,35 @@ Runs until stopped with `Ctrl+C`. If the browser session ever closes
 unexpectedly, it's detected and automatically relaunched. Logs go to
 `scraper.log` (auto-rotates at 100MB, keeps 3 backups) and the console.
 
+## Running via Docker
+
+The published image (`vinay098/monitor`) contains only the
+code — never `browser_profile/`, `secrets_local.py`, or
+`google_service_account.json`. Those are mounted in at runtime instead
+(see `docker-compose.yml`), so the image itself is safe to publish.
+
+You still need to log in **outside Docker first** — there's no way to do
+the interactive LinkedIn login (2FA, etc.) from inside a headless
+container:
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt && playwright install chromium
+python3 main.py   # log in, then Ctrl+C once "LinkedIn session ready" appears
+```
+
+That creates `browser_profile/`. Then, with `secrets_local.py` and
+`google_service_account.json` also in place (see Setup above):
+
+```bash
+# these must exist as files before the first `up`, or Docker creates
+# them as empty directories instead when bind-mounting
+touch linkedin_jobs.xlsx seen_jobs.db scraper.log
+
+docker compose up -d
+docker compose logs -f
+```
+
 ## Notes
 
 - LinkedIn's Terms of Service prohibit automated scraping. This is built for

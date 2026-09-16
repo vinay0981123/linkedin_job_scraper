@@ -1,0 +1,18 @@
+services:
+  linkedin-scraper:
+    image: vinay098/monitor:latest
+    restart: unless-stopped
+    volumes:
+      # Authenticated browser session — must already exist on the host (run
+      # `python3 main.py` outside Docker once first to log in) since there's
+      # no way to do the interactive LinkedIn login from inside a headless
+      # container.
+      - ./browser_profile:/app/browser_profile
+      # Real credentials — never baked into the image (see .dockerignore),
+      # mounted read-only.
+      - ./secrets_local.py:/app/secrets_local.py:ro
+      - ./google_service_account.json:/app/google_service_account.json:ro
+      # Output/state files — persist across container restarts.
+      - ./linkedin_jobs.xlsx:/app/linkedin_jobs.xlsx
+      - ./seen_jobs.db:/app/seen_jobs.db
+      - ./scraper.log:/app/scraper.log

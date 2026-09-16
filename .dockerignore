@@ -1,0 +1,19 @@
+# Sensitive / live credentials — never baked into the image, always
+# mounted in at runtime instead (see docker-compose.yml)
+browser_profile/
+secrets_local.py
+google_service_account.json
+
+# Generated data — also mounted at runtime, not part of the image
+seen_jobs.db
+linkedin_jobs.xlsx
+scraper.log*
+geo_cache.json
+
+# Dev/VCS artifacts not needed in the image
+.venv/
+.git/
+.gitignore
+__pycache__/
+*.pyc
+README.md

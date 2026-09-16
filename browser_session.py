@@ -53,7 +53,16 @@ def open_context() -> tuple[BrowserContext, object]:
         user_data_dir=str(config.BROWSER_PROFILE_DIR),
         headless=config.HEADLESS,
         args=(
-            ["--disable-blink-features=AutomationControlled"]
+            [
+                "--disable-blink-features=AutomationControlled",
+                # Needed when running as root (e.g. in a container) — Chromium
+                # refuses its own sandbox in that case otherwise. Harmless
+                # outside Docker too; a container already isolates the process.
+                "--no-sandbox",
+                # /dev/shm is often too small in containers by default,
+                # which otherwise crashes Chromium under real page load.
+                "--disable-dev-shm-usage",
+            ]
             + ([] if config.HEADLESS else ["--start-minimized"])
         ),
         viewport={"width": 1280, "height": 800},
