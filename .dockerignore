@@ -5,9 +5,8 @@ secrets_local.py
 google_service_account.json
 
 # Generated data — also mounted at runtime, not part of the image
-seen_jobs.db
-linkedin_jobs.xlsx
-scraper.log*
+seen.db
+application_log.log*
 geo_cache.json
 
 # Dev/VCS artifacts not needed in the image

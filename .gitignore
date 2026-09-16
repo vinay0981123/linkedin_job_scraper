@@ -1,10 +1,9 @@
 .venv/
 browser_profile/
-seen_jobs.db
-linkedin_jobs.xlsx
+seen.db
 geo_cache.json
 google_service_account.json
 secrets_local.py
-scraper.log*
+application_log.log*
 __pycache__/
 *.pyc

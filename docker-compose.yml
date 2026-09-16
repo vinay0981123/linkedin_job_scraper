@@ -13,6 +13,5 @@ services:
       - ./secrets_local.py:/app/secrets_local.py:ro
       - ./google_service_account.json:/app/google_service_account.json:ro
       # Output/state files — persist across container restarts.
-      - ./linkedin_jobs.xlsx:/app/linkedin_jobs.xlsx
-      - ./seen_jobs.db:/app/seen_jobs.db
-      - ./scraper.log:/app/scraper.log
+      - ./seen.db:/app/seen.db
+      - ./application_log.log:/app/application_log.log

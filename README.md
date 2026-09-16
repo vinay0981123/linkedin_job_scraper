@@ -2,7 +2,7 @@
 
 Continuously polls LinkedIn for newly posted jobs matching a set of title
 keywords, filters them down to genuinely relevant, fresh, in-range-experience
-postings, and pushes matches to Excel, Google Sheets, and Telegram.
+postings, and pushes matches to Google Sheets and Telegram.
 
 No AI/LLM involved anywhere in the pipeline — matching and filtering are all
 plain keyword/regex logic.
@@ -26,9 +26,8 @@ Every 5 minutes, for each configured city:
      "3+ years", "minimum 3 years", etc.) and drops postings that need more
      than you have
 3. Writes every surviving match to:
-   - A local Excel file, one worksheet per day (`Sep16`, `Sep17`, ...),
-     rolling 7-day window
-   - A Google Sheet, mirroring the same per-day structure
+   - A Google Sheet, one worksheet per day (`Sep16`, `Sep17`, ...), rolling
+     7-day window
    - Telegram, one message per job
 
 ## Setup
@@ -100,7 +99,8 @@ python3 main.py
 
 Runs until stopped with `Ctrl+C`. If the browser session ever closes
 unexpectedly, it's detected and automatically relaunched. Logs go to
-`scraper.log` (auto-rotates at 100MB, keeps 3 backups) and the console.
+`application_log.log` (auto-rotates at 100MB, keeps 3 backups) and the
+console. Dedup state lives in `seen.db`.
 
 ## Running via Docker
 
@@ -125,7 +125,7 @@ That creates `browser_profile/`. Then, with `secrets_local.py` and
 ```bash
 # these must exist as files before the first `up`, or Docker creates
 # them as empty directories instead when bind-mounting
-touch linkedin_jobs.xlsx seen_jobs.db scraper.log
+touch seen.db application_log.log
 
 docker compose up -d
 docker compose logs -f

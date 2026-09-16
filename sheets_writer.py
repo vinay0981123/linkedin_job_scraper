@@ -1,11 +1,10 @@
 """Appends matched jobs to a date-named worksheet (e.g. "Sep16") in the
-Google Sheet, mirroring excel_writer.py — one sheet per day, auto-created
-at local midnight, with only the last MAX_DAILY_SHEETS kept.
+Google Sheet — one sheet per day, auto-created at local midnight, with only
+the last MAX_DAILY_SHEETS kept.
 
 Uses a service account (gspread) — no browser OAuth consent flow, so it
-works unattended. Any failure here is logged and swallowed: the local Excel
-file (excel_writer.py) is the durable copy and must never be blocked by a
-Sheets API hiccup.
+works unattended. Any failure here is logged and swallowed rather than
+raised, so a Sheets API hiccup never takes down the main polling loop.
 """
 
 import logging
@@ -105,7 +104,7 @@ def _append_rows(ws, rows: list[list]) -> None:
 
 
 def append_jobs(jobs: list[dict]) -> None:
-    """jobs: list of dicts with keys matching excel_writer's job dict shape."""
+    """jobs: list of dicts as built in main.py's run_cycle()."""
     if not jobs or not config.GOOGLE_SHEETS_ENABLED:
         return
 

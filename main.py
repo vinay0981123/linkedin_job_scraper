@@ -1,7 +1,7 @@
 """Continuously polls LinkedIn for jobs matching config.KEYWORDS in
 config.LOCATIONS, posted within the last MAX_POSTED_AGE_MINUTES, requiring
-at most YOUR_YEARS_OF_EXPERIENCE, and appends new matches to Excel/Sheets plus
-a Telegram notification per job. Runs until interrupted (Ctrl+C).
+at most YOUR_YEARS_OF_EXPERIENCE, and appends new matches to Google Sheets
+plus a Telegram notification per job. Runs until interrupted (Ctrl+C).
 
 Setup (once):
     pip install -r requirements.txt
@@ -21,7 +21,6 @@ from playwright.sync_api import Error as PlaywrightError
 
 import config
 import dedup_store
-import excel_writer
 import sheets_writer
 import telegram_notifier
 from browser_session import open_context
@@ -130,7 +129,6 @@ def run_cycle(page, keyword_query: str) -> int:
 
         _jitter()
 
-    excel_writer.append_jobs(new_jobs)
     sheets_writer.append_jobs(new_jobs)
     telegram_notifier.notify_new_jobs(new_jobs)
     return len(new_jobs)
@@ -155,9 +153,7 @@ def main():
 
             try:
                 found = run_cycle(page, keyword_query)
-                logger.info(
-                    "-> %s new matching job(s) saved to %s", found, config.EXCEL_FILE_PATH.name
-                )
+                logger.info("-> %s new matching job(s) saved to Google Sheets", found)
             except PlaywrightError:
                 logger.exception(
                     "Browser session died (closed/crashed) — reopening automatically"

@@ -83,19 +83,19 @@ MAX_POSTED_AGE_MINUTES = 20
 YOUR_YEARS_OF_EXPERIENCE = 4
 
 # Output files
-EXCEL_FILE_PATH = BASE_DIR / "linkedin_jobs.xlsx"
-DEDUP_DB_PATH = BASE_DIR / "seen_jobs.db"
-LOG_FILE_PATH = BASE_DIR / "scraper.log"
+DEDUP_DB_PATH = BASE_DIR / "seen.db"
+LOG_FILE_PATH = BASE_DIR / "application_log.log"
 
 # Log auto-rotates once it hits this size, keeping LOG_BACKUP_COUNT old
-# files (scraper.log.1, .2, ...) before the oldest is deleted — bounds disk
-# usage instead of growing forever over a long-running process.
+# files (application_log.log.1, .2, ...) before the oldest is deleted —
+# bounds disk usage instead of growing forever over a long-running process.
 LOG_MAX_BYTES = 100 * 1024 * 1024  # 100MB
 LOG_BACKUP_COUNT = 3
 
-# Google Sheets — mirrors the Excel output. The service account and sheet
-# sharing are already set up; GOOGLE_SERVICE_ACCOUNT_FILE just needs a valid
-# key file present (see setup notes if it's missing).
+# Google Sheets is the sole spreadsheet output (no local Excel file) — the
+# service account and sheet sharing are already set up;
+# GOOGLE_SERVICE_ACCOUNT_FILE just needs a valid key file present (see
+# setup notes if it's missing).
 GOOGLE_SHEETS_ENABLED = True
 GOOGLE_SERVICE_ACCOUNT_FILE = BASE_DIR / "google_service_account.json"
 GOOGLE_SHEET_ID = secrets_local.GOOGLE_SHEET_ID
