@@ -131,6 +131,23 @@ docker compose up -d
 docker compose logs -f
 ```
 
+### Surviving a reboot
+
+`restart: unless-stopped` in `docker-compose.yml` already makes Docker bring
+the container back on its own after a daemon restart or host reboot. For
+explicit control (`systemctl start/stop/status`) on a dedicated server,
+install `monitor.service` too:
+
+```bash
+sudo cp monitor.service /etc/systemd/system/monitor.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now monitor.service
+```
+
+Verified by restarting the Docker daemon (`sudo systemctl restart docker`)
+and confirming the container came back up and completed a poll cycle with
+the session still valid — not just assumed from the restart policy alone.
+
 ## Notes
 
 - LinkedIn's Terms of Service prohibit automated scraping. This is built for
