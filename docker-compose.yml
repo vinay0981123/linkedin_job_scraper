@@ -2,6 +2,15 @@ services:
   linkedin-scraper:
     image: vinay098/monitor:latest
     restart: unless-stopped
+    # Separate from the app's own internal log rotation (application_log.log,
+    # see config.py) — this bounds Docker's own captured stdout/stderr
+    # (`docker compose logs`), which has no size cap by default and would
+    # otherwise grow unbounded on the host over a long-running process.
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "3"
     volumes:
       # Authenticated browser session — must already exist on the host (run
       # `python3 main.py` outside Docker once first to log in) since there's
